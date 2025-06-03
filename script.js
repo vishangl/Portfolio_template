@@ -166,41 +166,110 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Form submission handling
+// Contact Form Handling
 const contactForm = document.querySelector('.contact-form');
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
+const submitButton = contactForm.querySelector('button[type="submit"]');
+
+contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Disable submit button and show loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
         const formData = new FormData(contactForm);
-        const submitButton = contactForm.querySelector('button[type="submit"]');
-        
-        try {
-            submitButton.disabled = true;
-            submitButton.textContent = 'Sending...';
-            
-            const response = await fetch(contactForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                alert('Message sent successfully!');
-                contactForm.reset();
-            } else {
-                throw new Error('Failed to send message');
+        const response = await fetch(contactForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
             }
-        } catch (error) {
-            alert('Failed to send message. Please try again later.');
-        } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = 'Send Message';
+        });
+        
+        if (response.ok) {
+            // Show success message
+            showNotification('Message sent successfully! I will get back to you soon.', 'success');
+            contactForm.reset();
+        } else {
+            // Show error message
+            showNotification('Oops! There was a problem sending your message. Please try again.', 'error');
         }
-    });
+    } catch (error) {
+        // Show error message
+        showNotification('Oops! There was a problem sending your message. Please try again.', 'error');
+    } finally {
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+    }
+});
+
+// Notification function
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Add styles for the notification
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.padding = '15px 25px';
+    notification.style.borderRadius = '5px';
+    notification.style.color = 'white';
+    notification.style.display = 'flex';
+    notification.style.alignItems = 'center';
+    notification.style.gap = '10px';
+    notification.style.zIndex = '1000';
+    notification.style.animation = 'slideIn 0.5s ease forwards';
+    
+    if (type === 'success') {
+        notification.style.backgroundColor = '#10B981';
+    } else {
+        notification.style.backgroundColor = '#EF4444';
+    }
+    
+    // Remove notification after 5 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.5s ease forwards';
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 5000);
 }
+
+// Add keyframe animations for notifications
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 
 // Intersection Observer for fade-in animations
 const observerOptions = {
