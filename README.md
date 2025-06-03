@@ -44,6 +44,11 @@ cp path/to/your/resume.pdf assets/resume.pdf
    - Test all links and forms
    - Check responsiveness on different devices
 
+7. Formspree Integration:
+   - Sign up for a free Formspree account at https://formspree.io
+   - Create a new form and get your form endpoint (I've used a placeholder endpoint in the code)
+   - Replace the form action URL in the HTML with your actual Formspree endpoint
+
 ## Project Structure
 
 ```
